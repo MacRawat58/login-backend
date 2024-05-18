@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-cNWZl+lIjcdENlrZzmM1zZi+DsPGsyPNwvsMuY1vQJ1oG2WlSV6rGx7W4O4tM5uTeN4mUJgdE0B5LJYlyPBCmg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #333;
+    }
+
+    .form-group input,
+    .form-group button {
+      width: 100%;
+      padding: 10px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group button:focus {
+      outline: none;
+      border-color: #007bff;
+    }
+
+    .form-group button {
+      background-color: #007bff;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .form-group button:hover {
+      background-color: #0056b3;
+    }
+
+    .dashboard {
+      display: none;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .user-list {
+      margin-top: 20px;
+    }
+
+    .user-list ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .user-list li {
+      background-color: #f9f9f9;
+      margin-bottom: 10px;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .user-list button {
+      background-color: #dc3545;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+    }
+
+    .user-list button:hover {
+      background-color: #c82333;
+    }
+
+    .logout-button {
+      background-color: #6c757d;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .logout-button:hover {
+      background-color: #5a6268;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="loginContainer">
+    <h2 style="text-align: center;">Admin Login</h2>
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="loginEmail">Email</label>
+        <input type="email" id="loginEmail" placeholder="Enter your email" required>
+      </div>
+      <div class="form-group">
+        <label for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" placeholder="Enter your password" required>
+      </div>
+      <div class="form-group">
+        <button type="submit">Login <i class="fas fa-sign-in-alt" style="margin-left: 5px;"></i></button>
+      </div>
+    </form>
+  </div>
+
+  <div class="dashboard" id="dashboard">
+    <h2 style="text-align: center;">User Management</h2>
+    <div style="text-align: right; margin-bottom: 10px;">
+      <button id="logoutButton" class="logout-button">Logout <i class="fas fa-sign-out-alt" style="margin-left: 5px;"></i></button>
+    </div>
+    <h3>Add User</h3>
+    <form id="registerForm">
+      <div class="form-group">
+        <label for="registerEmail">Email</label>
+        <input type="email" id="registerEmail" placeholder="Enter new user's email" required>
+      </div>
+      <div class="form-group">
+        <label for="registerPassword">Password</label>
+        <input type="password" id="registerPassword" placeholder="Enter new user's password" required>
+      </div>
+      <div class="form-group">
+        <button type="submit">Register <i class="fas fa-user-plus" style="margin-left: 5px;"></i></button>
+      </div>
+    </form>
+    <h3>Current Users</h3>
+    <div class="user-list">
+      <ul id="userList"></ul>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js" integrity="sha512-FJL3C9C3ETVWUF1AF6o3a9GgbNKR9T9m8RBpKc3JIsqHOK26Td75MdsStN6JjwTn6VCHgYv2trO8SUbMamRLDw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+      if (response.status === 200) {
+        document.getElementById('loginContainer').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+        loadUsers();
+      } else {
+        alert(data.message);
+      }
+    });
+
+    document.getElementById('logoutButton').addEventListener('click', () => {
+      document.getElementById('dashboard').style.display = 'none';
+      document.getElementById('loginContainer').style.display = 'block';
+    });
+
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('registerEmail').value;
+      const password = document.getElementById('registerPassword').value;
+
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+      alert(data.message);
+      if (response.status === 200) {
+        loadUsers();
+      }
+    });
+
+    async function loadUsers() {
+      const response = await fetch('/api/users');
+      const users = await response.json();
+      const userList = document.getElementById('userList');
+      userList.innerHTML = '';
+      users.forEach(user => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <span style="flex: 1;">${user.email}</span>
+            <button class="delete-button" data-email="${user.email}">Delete <i class="fas fa-trash-alt" style="margin-left: 5px;"></i></button>
+          </div>
+        `;
+        li.style.marginBottom = '10px';
+        li.style.padding = '15px';
+        li.style.borderRadius = '8px';
+        li.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)';
+        li.style.backgroundColor = '#f9f9f9';
+        li.querySelector('.delete-button').addEventListener('click', () => deleteUser(user.email));
+        userList.appendChild(li);
+      });
+    }
+
+    async function deleteUser(email) {
+      const response = await fetch('/api/users', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const data = await response.json();
+      alert(data.message);
+      loadUsers();
+    }
+  </script>
+</body>
+</html>
